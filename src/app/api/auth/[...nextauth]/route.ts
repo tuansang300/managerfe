@@ -34,7 +34,8 @@ export const authOptions: NextAuthOptions = {
       async authorize(credentials, req) {
         if (!credentials?.username || !credentials?.password) return null;
         const { username, password } = credentials;
-        const res: any = await fetch(Backend_URL + "/authen/signin", {
+        const url = Backend_URL + "/authen/signin";
+        const res: any = await fetch(url, {
           method: "POST",
           body: JSON.stringify({
             username,
