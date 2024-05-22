@@ -28,7 +28,7 @@ const PlayerPage = (props: Props) => {
 
   const initSocket = useCallback(() => {
     if (!socketRef.current) {
-      const newSocket = new WebSocket("wss://103.145.63.111:8888");
+      const newSocket = new WebSocket("ws://103.145.63.111:3001");
       newSocket.onopen = () => {
         const updateInfo = {
           event: "events",
