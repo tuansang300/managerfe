@@ -13,7 +13,7 @@ const SignInButton = () => {
           href={"/api/auth/signout"}
           className="flex gap-4 ml-auto text-red-600"
         >
-          Sign Out
+          Thoát
         </Link>
       </div>
     );
@@ -24,13 +24,7 @@ const SignInButton = () => {
         href={"/api/auth/signin"}
         className="flex gap-4 ml-auto text-green-600"
       >
-        Sign In
-      </Link>
-      <Link
-        href={"/signup"}
-        className="flex gap-4 ml-auto bg-green-600 text-green-200 p-2 rounded"
-      >
-        Sign Up
+        Đăng Nhập
       </Link>
     </div>
   );

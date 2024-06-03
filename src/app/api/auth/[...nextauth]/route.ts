@@ -1,11 +1,10 @@
-import { Backend_URL } from "@/lib/Constants";
 import { NextAuthOptions } from "next-auth";
 import { JWT } from "next-auth/jwt";
 import NextAuth from "next-auth/next";
 import CredentialsProvider from "next-auth/providers/credentials";
 
 async function refreshToken(token: JWT): Promise<JWT> {
-  const res = await fetch(Backend_URL + "/authen/refresh", {
+  const res = await fetch(process.env.BACKEND_URL + "/authen/refresh", {
     method: "POST",
     headers: {
       authorization: `Refresh ${token.backendTokens.refreshToken}`,
@@ -24,16 +23,17 @@ export const authOptions: NextAuthOptions = {
       name: "Credentials",
       credentials: {
         username: {
-          label: "Username",
+          label: "Tên Đăng Nhập",
           type: "text",
-          placeholder: "Username",
+          placeholder: "Nhập tên đăng nhập",
         },
-        password: { label: "Password", type: "password" },
+        password: { label: "Mật Khẩu", type: "password" },
       },
       async authorize(credentials, req) {
         if (!credentials?.username || !credentials?.password) return null;
         const { username, password } = credentials;
-        const url = Backend_URL + "/authen/signin";
+        const url = process.env.BACKEND_URL + "/authen/signin";
+        console.log("URL", url);
         const res: any = await fetch(url, {
           method: "POST",
           body: JSON.stringify({

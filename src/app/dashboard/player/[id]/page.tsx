@@ -1,5 +1,4 @@
 "use client";
-import { Button } from "@/components/Button";
 import ImageDecode from "@/components/ImageDecode";
 import { useSession } from "next-auth/react";
 import { useEffect, useRef, useState, useCallback } from "react";
@@ -14,6 +13,7 @@ const PlayerPage = (props: Props) => {
   const { data: session, status } = useSession();
   const socketRef = useRef<WebSocket | null>(null);
   const [base64Image, setBase64Image] = useState("");
+  const [isRecording, setIsRecording] = useState(false);
 
   const setMessageFromServer = useCallback((data: any) => {
     switch (data.event) {
@@ -28,17 +28,16 @@ const PlayerPage = (props: Props) => {
 
   const initSocket = useCallback(() => {
     if (!socketRef.current) {
-      const newSocket = new WebSocket("ws://103.145.63.111:3001");
+      const websocket = process.env.WSCONNECT || "ws://127.0.0.2:8888";
+      const newSocket = new WebSocket("ws://" + websocket);
       newSocket.onopen = () => {
         const updateInfo = {
           event: "events",
           data: {
             msg: "MSG_UPDATEINFORWEBPAGE",
-            serverstring: "192.168.1.17",
             userid: session?.user?.username,
           },
         };
-        console.log(updateInfo);
         newSocket.send(JSON.stringify(updateInfo));
       };
       newSocket.onmessage = (event) => {
@@ -48,26 +47,31 @@ const PlayerPage = (props: Props) => {
     }
   }, [session, setMessageFromServer]);
 
-  const getListPlayer = useCallback(() => {
-    const getlistUser = {
-      event: "events",
-      data: {
-        msg: "MSG_LISTUSER",
-      },
-    };
-    if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN) {
-      socketRef.current.send(JSON.stringify(getlistUser));
-    } else {
-      console.log("WebSocket is not open, cannot send message");
-    }
-  }, []);
-
   const GetImageUser = (username: string) => {
+    console.log("GetImageUser", isRecording);
     const getImageUser = {
       event: "events",
       data: {
         msg: "MSG_RECORD",
         userid: username,
+        status: isRecording == false ? "true" : "false",
+      },
+    };
+    setIsRecording(!isRecording);
+    if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN) {
+      socketRef.current.send(JSON.stringify(getImageUser));
+    } else {
+      console.log("WebSocket is not open, cannot send message");
+    }
+  };
+
+  const CloseShareImage = (username: string) => {
+    const getImageUser = {
+      event: "events",
+      data: {
+        msg: "MSG_RECORD",
+        userid: username,
+        status: "false",
       },
     };
     if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN) {
@@ -83,11 +87,12 @@ const PlayerPage = (props: Props) => {
 
       return () => {
         if (socketRef.current) {
+          CloseShareImage(props.params.id);
           socketRef.current.close();
         }
       };
     }
-  }, [status, initSocket, getListPlayer]);
+  }, [status]);
   return (
     <div>
       {status === "authenticated" ? (
@@ -96,9 +101,9 @@ const PlayerPage = (props: Props) => {
             onClick={() => GetImageUser(props.params.id)}
             className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
           >
-            Get Screen
+            {isRecording == false ? "Start Recording" : "Stop Recording"}
           </button>
-          <ImageDecode base64Data={base64Image} />
+          {isRecording == true ? <ImageDecode base64Data={base64Image} /> : ""}
         </>
       ) : (
         <p>Please log in to see the player list.</p>

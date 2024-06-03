@@ -31,13 +31,13 @@ const Page = () => {
 
   const initSocket = useCallback(() => {
     if (!socketRef.current) {
-      const newSocket = new WebSocket("ws://103.145.63.111:3001");
+      const websocket = process.env.WSCONNECT || "ws://127.0.0.2:8888";
+      const newSocket = new WebSocket("ws://" + websocket);
       newSocket.onopen = () => {
         const updateInfo = {
           event: "events",
           data: {
             msg: "MSG_UPDATEINFORWEBPAGE",
-            serverstring: "192.168.1.17",
             userid: session?.user?.username,
           },
         };
